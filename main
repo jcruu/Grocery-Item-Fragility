@@ -61,3 +61,667 @@ train_ds = tf.keras.utils.image_dataset_from_directory(
   seed=123,
   image_size=(img_height, img_width),
   batch_size=batch_size)
+  
+  class_names = train_ds.class_names
+print(class_names)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(6, 6))
+for images, labels in train_ds.take(1):
+  for i in range(15):
+    ax = plt.subplot(3, 5, i+1)
+    plt.imshow(images[i].numpy().astype("uint8"))
+    plt.title(class_names[labels[i]])
+    plt.axis("off")
+    
+    
+CS497_Project.ipynb_
+
+print(X.shape)
+print(y.shape)
+
+(6,)
+(6,)
+
+X = X.reshape(X.shape[0], 1) # same as X[:, np.newaxis]
+print(X.shape)
+
+(6, 1)
+
+y = y.reshape(-1, 1) # same as y.reshape(y.shape[0], 1)
+print(y.shape)
+
+(6, 1)
+
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import PIL
+import tensorflow as tf
+
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
+
+from google.colab import drive
+
+drive.mount('/content/gdrive')
+
+Mounted at /content/gdrive
+
+'2020-04-12 14-38 page 1 (1).pdf'
+'2020-04-12 14-38 page 1 (2).pdf'
+'2020-04-12 14-38 page 1 (3).pdf'
+'2020-04-12 14-38 page 1.pdf'
+'2020-04-12 14-38 page 2 (1).pdf'
+'2020-04-12 14-38 page 2 (2).pdf'
+'2020-04-12 14-38 page 2.pdf'
+'2020-04-12 14-38 page 3 (1).pdf'
+'2020-04-12 14-38 page 3.pdf'
+'2020-04-12 14-38 page 4.pdf'
+'archive (19) 2.46.14 PM.zip'
+'assignment 2'
+'assignment 3'
+'Assignment 3.gdoc'
+'Assignment 5.gdoc'
+ Assignment6.ipynb
+'assignment 8'
+'bandicam 2020-11-20 14-36-45-700.mp4'
+'bell hooks.gdoc'
+ bio.PNG
+'Colab Notebooks'
+'COMM Project.gdoc'
+'cs311 midterm'
+'cs497 midterm'
+ CS497_Project.ipynb
+'CS Final Study Guide.gdoc'
+'Essay 3.gdoc'
+ Final_Essay.docx.gdoc
+ Final_Essay.docx.pdf
+'Getting started.pdf'
+ Go.gslides
+'Green Machine_ Experimentation & Priorities (1).mp4'
+ Human.zip
+ image0.png
+ images_resized
+ images_resized-2
+ images_resized-3
+ images_resized-4
+'Important Document '
+ Meetup.gslides
+'(M) GS CLASS CERTIFICATES (11).jpg'
+'M. Jen - Determination of Accommodations (1) (1).pdf'
+'M. Jen - Determination of Accommodations (1).pdf'
+'M. Jen - Determination of Accommodations (2).pdf'
+'M. Jen - Determination of Accommodations.pdf'
+'non western project 2.gdoc'
+'Page 1.pdf'
+'Personality Presentation.gslides'
+'Personality Presentation.pptx'
+'personal statement.docx'
+'project 2.gdoc'
+'project 2 notes.gdoc'
+ prospectus.gdoc
+ RecordIt-D94E101A-05DD-4BED-AA20-9EBD37B4292C.mp4
+'reflection 2.gdoc'
+ reflection2.gdoc
+ reflection.gdoc
+ Reflection.gdoc
+ repo.zip
+ Section_06_01__ESS_STATS2e.pptx
+ Section_06_02__ESS_STATS2e.pptx
+ Section_06_05__ESS_STATS2e.pptx
+ Sources.gdoc
+ SSR_TSRPT.pdf
+ trainingandtestdata
+'Untitled document (1).gdoc'
+'Untitled document (2).gdoc'
+'Untitled document (3).gdoc'
+'Untitled document (4).gdoc'
+'Untitled document (5).gdoc'
+'Untitled document (6).gdoc'
+'Untitled document (7).gdoc'
+'Untitled document.gdoc'
+'Untitled presentation.gslides'
+ WordHash.zip
+
+batch_size = 32   # you can change this, maybe you want to try a few different batch sizes
+img_height = 400  # don't change this
+img_width = 400   # don't change this
+
+train_ds = tf.keras.utils.image_dataset_from_directory(
+  "/content/gdrive/MyDrive/images_FINAL",    # the path of ASL_data on your googld drive something like /content/gdrive/My Drive/CS497_Assignment5_data/ASL_data
+  validation_split=0.2, #apparently cannot make this less than 0.167 or i will get an error
+  subset="training",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+
+val_ds = tf.keras.utils.image_dataset_from_directory(
+  "/content/gdrive/My Drive/images_FINAL",  ## # the path of ASL_data on your googld drive something like /content/gdrive/My Drive/CS497_Assignment5_data/ASL_data
+  validation_split=0.2,
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+
+Found 677 files belonging to 6 classes.
+Using 135 files for validation.
+
+class_names = train_ds.class_names
+print(class_names)
+
+['apples', 'bread', 'cheese', 'eggs', 'milk', 'water']
+
+(32, 400, 400, 3)
+(32,)
+
+0.0 1.0
+
+num_classes = len(class_names)
+
+model = Sequential([
+  layers.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+  layers.Conv2D(16, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+model.compile(optimizer= 'adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.summary()
+
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ rescaling_1 (Rescaling)     (None, 400, 400, 3)       0         
+                                                                 
+ conv2d (Conv2D)             (None, 400, 400, 16)      448       
+                                                                 
+ max_pooling2d (MaxPooling2D  (None, 200, 200, 16)     0         
+ )                                                               
+                                                                 
+ conv2d_1 (Conv2D)           (None, 200, 200, 32)      4640      
+                                                                 
+ max_pooling2d_1 (MaxPooling  (None, 100, 100, 32)     0         
+ 2D)                                                             
+                                                                 
+ conv2d_2 (Conv2D)           (None, 100, 100, 64)      18496     
+                                                                 
+ max_pooling2d_2 (MaxPooling  (None, 50, 50, 64)       0         
+ 2D)                                                             
+                                                                 
+ flatten (Flatten)           (None, 160000)            0         
+                                                                 
+ dense (Dense)               (None, 128)               20480128  
+                                                                 
+ dense_1 (Dense)             (None, 6)                 774       
+                                                                 
+=================================================================
+Total params: 20,504,486
+Trainable params: 20,504,486
+Non-trainable params: 0
+_________________________________________________________________
+
+epochs=10
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
+)
+
+Epoch 1/10
+17/17 [==============================] - 84s 5s/step - loss: 0.0371 - accuracy: 0.9945 - val_loss: 1.1117 - val_accuracy: 0.7481
+Epoch 2/10
+17/17 [==============================] - 84s 5s/step - loss: 0.0137 - accuracy: 1.0000 - val_loss: 1.3851 - val_accuracy: 0.7481
+Epoch 3/10
+17/17 [==============================] - 88s 5s/step - loss: 0.0071 - accuracy: 0.9982 - val_loss: 1.1834 - val_accuracy: 0.7704
+Epoch 4/10
+17/17 [==============================] - 84s 5s/step - loss: 0.0027 - accuracy: 1.0000 - val_loss: 1.2467 - val_accuracy: 0.7778
+Epoch 5/10
+17/17 [==============================] - 84s 5s/step - loss: 0.0011 - accuracy: 1.0000 - val_loss: 1.3231 - val_accuracy: 0.7852
+Epoch 6/10
+17/17 [==============================] - 83s 5s/step - loss: 7.3534e-04 - accuracy: 1.0000 - val_loss: 1.2747 - val_accuracy: 0.7704
+Epoch 7/10
+17/17 [==============================] - 83s 5s/step - loss: 5.1986e-04 - accuracy: 1.0000 - val_loss: 1.2820 - val_accuracy: 0.7630
+Epoch 8/10
+17/17 [==============================] - 83s 5s/step - loss: 3.8976e-04 - accuracy: 1.0000 - val_loss: 1.2960 - val_accuracy: 0.7556
+Epoch 9/10
+17/17 [==============================] - 84s 5s/step - loss: 3.1966e-04 - accuracy: 1.0000 - val_loss: 1.2964 - val_accuracy: 0.7704
+Epoch 10/10
+17/17 [==============================] - 83s 5s/step - loss: 2.7185e-04 - accuracy: 1.0000 - val_loss: 1.3113 - val_accuracy: 0.7704
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
+
+data_augmentation = keras.Sequential(
+  [
+    layers.RandomFlip("horizontal",
+                      input_shape=(img_height,
+                                  img_width,
+                                  3)),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.1),
+  ]
+)
+
+plt.figure(figsize=(10, 10))
+for images, _ in train_ds.take(1):
+  for i in range(9):
+    augmented_images = data_augmentation(images)
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(augmented_images[0].numpy().astype("uint8"))
+    plt.axis("off")
+
+model = Sequential([
+  data_augmentation,
+  layers.Rescaling(1./255),
+  layers.Conv2D(16, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),    # max pooling layer
+  layers.Conv2D(32, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),   # max pooling layer
+  layers.Conv2D(64, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),    # max pooling layer
+  layers.Dropout(0.2),   # you may want to tune on drop out rate
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+epochs = 100
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
+)
+
+Epoch 1/100
+17/17 [==============================] - 87s 5s/step - loss: 3.2172 - accuracy: 0.2122 - val_loss: 1.5457 - val_accuracy: 0.2741
+Epoch 2/100
+17/17 [==============================] - 90s 5s/step - loss: 1.4057 - accuracy: 0.4502 - val_loss: 1.2701 - val_accuracy: 0.4815
+Epoch 3/100
+17/17 [==============================] - 86s 5s/step - loss: 1.2306 - accuracy: 0.5627 - val_loss: 0.9472 - val_accuracy: 0.6444
+Epoch 4/100
+17/17 [==============================] - 86s 5s/step - loss: 1.0256 - accuracy: 0.6661 - val_loss: 0.8710 - val_accuracy: 0.6519
+Epoch 5/100
+17/17 [==============================] - 86s 5s/step - loss: 0.9200 - accuracy: 0.6697 - val_loss: 0.7951 - val_accuracy: 0.7185
+Epoch 6/100
+17/17 [==============================] - 86s 5s/step - loss: 0.7788 - accuracy: 0.7362 - val_loss: 0.6663 - val_accuracy: 0.7704
+Epoch 7/100
+17/17 [==============================] - 86s 5s/step - loss: 0.7367 - accuracy: 0.7491 - val_loss: 0.8318 - val_accuracy: 0.7407
+Epoch 8/100
+17/17 [==============================] - 86s 5s/step - loss: 0.7634 - accuracy: 0.7435 - val_loss: 0.5681 - val_accuracy: 0.7778
+Epoch 9/100
+17/17 [==============================] - 86s 5s/step - loss: 0.5842 - accuracy: 0.7915 - val_loss: 0.4734 - val_accuracy: 0.8667
+Epoch 10/100
+17/17 [==============================] - 86s 5s/step - loss: 0.5853 - accuracy: 0.7934 - val_loss: 0.5445 - val_accuracy: 0.8148
+Epoch 11/100
+17/17 [==============================] - 86s 5s/step - loss: 0.4941 - accuracy: 0.8376 - val_loss: 0.4221 - val_accuracy: 0.8593
+Epoch 12/100
+17/17 [==============================] - 86s 5s/step - loss: 0.4571 - accuracy: 0.8579 - val_loss: 0.5124 - val_accuracy: 0.8444
+Epoch 13/100
+17/17 [==============================] - 86s 5s/step - loss: 0.4358 - accuracy: 0.8432 - val_loss: 0.5351 - val_accuracy: 0.8593
+Epoch 14/100
+17/17 [==============================] - 86s 5s/step - loss: 0.4242 - accuracy: 0.8432 - val_loss: 0.5962 - val_accuracy: 0.8222
+Epoch 15/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3992 - accuracy: 0.8690 - val_loss: 0.6204 - val_accuracy: 0.8593
+Epoch 16/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3916 - accuracy: 0.8782 - val_loss: 0.5336 - val_accuracy: 0.8148
+Epoch 17/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3049 - accuracy: 0.8985 - val_loss: 0.6300 - val_accuracy: 0.8148
+Epoch 18/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3172 - accuracy: 0.9022 - val_loss: 0.5811 - val_accuracy: 0.8000
+Epoch 19/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3395 - accuracy: 0.8708 - val_loss: 0.6373 - val_accuracy: 0.7926
+Epoch 20/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3118 - accuracy: 0.8948 - val_loss: 0.5230 - val_accuracy: 0.8222
+Epoch 21/100
+17/17 [==============================] - 86s 5s/step - loss: 0.3082 - accuracy: 0.8967 - val_loss: 0.5978 - val_accuracy: 0.8222
+Epoch 22/100
+17/17 [==============================] - 87s 5s/step - loss: 0.2468 - accuracy: 0.9059 - val_loss: 0.5123 - val_accuracy: 0.8370
+Epoch 23/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1770 - accuracy: 0.9446 - val_loss: 0.5749 - val_accuracy: 0.8519
+Epoch 24/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1595 - accuracy: 0.9576 - val_loss: 0.6219 - val_accuracy: 0.8815
+Epoch 25/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1619 - accuracy: 0.9428 - val_loss: 0.6252 - val_accuracy: 0.8296
+Epoch 26/100
+17/17 [==============================] - 86s 5s/step - loss: 0.2005 - accuracy: 0.9391 - val_loss: 0.7091 - val_accuracy: 0.8074
+Epoch 27/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1643 - accuracy: 0.9410 - val_loss: 0.5494 - val_accuracy: 0.8370
+Epoch 28/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1856 - accuracy: 0.9428 - val_loss: 0.8872 - val_accuracy: 0.7852
+Epoch 29/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1520 - accuracy: 0.9576 - val_loss: 0.5599 - val_accuracy: 0.7926
+Epoch 30/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0818 - accuracy: 0.9723 - val_loss: 0.5720 - val_accuracy: 0.8074
+Epoch 31/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1061 - accuracy: 0.9705 - val_loss: 0.4379 - val_accuracy: 0.8593
+Epoch 32/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0676 - accuracy: 0.9815 - val_loss: 0.4886 - val_accuracy: 0.8815
+Epoch 33/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1221 - accuracy: 0.9613 - val_loss: 0.7847 - val_accuracy: 0.7778
+Epoch 34/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1797 - accuracy: 0.9410 - val_loss: 0.7583 - val_accuracy: 0.8296
+Epoch 35/100
+17/17 [==============================] - 86s 5s/step - loss: 0.2179 - accuracy: 0.9280 - val_loss: 0.6738 - val_accuracy: 0.8148
+Epoch 36/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1513 - accuracy: 0.9428 - val_loss: 0.7453 - val_accuracy: 0.8148
+Epoch 37/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1127 - accuracy: 0.9594 - val_loss: 0.7679 - val_accuracy: 0.8296
+Epoch 38/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1336 - accuracy: 0.9742 - val_loss: 0.5698 - val_accuracy: 0.8519
+Epoch 39/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0521 - accuracy: 0.9815 - val_loss: 0.8325 - val_accuracy: 0.8444
+Epoch 40/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1178 - accuracy: 0.9668 - val_loss: 0.9112 - val_accuracy: 0.8222
+Epoch 41/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1312 - accuracy: 0.9705 - val_loss: 0.8113 - val_accuracy: 0.8296
+Epoch 42/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1501 - accuracy: 0.9539 - val_loss: 0.5592 - val_accuracy: 0.8889
+Epoch 43/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0725 - accuracy: 0.9779 - val_loss: 0.6979 - val_accuracy: 0.8593
+Epoch 44/100
+17/17 [==============================] - 91s 5s/step - loss: 0.0372 - accuracy: 0.9908 - val_loss: 0.5419 - val_accuracy: 0.8667
+Epoch 45/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0672 - accuracy: 0.9779 - val_loss: 0.6542 - val_accuracy: 0.8741
+Epoch 46/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0341 - accuracy: 0.9871 - val_loss: 0.6174 - val_accuracy: 0.9037
+Epoch 47/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0474 - accuracy: 0.9815 - val_loss: 0.8392 - val_accuracy: 0.8370
+Epoch 48/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0770 - accuracy: 0.9742 - val_loss: 0.8808 - val_accuracy: 0.8370
+Epoch 49/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0354 - accuracy: 0.9945 - val_loss: 0.8240 - val_accuracy: 0.8370
+Epoch 50/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0726 - accuracy: 0.9760 - val_loss: 0.7679 - val_accuracy: 0.8296
+Epoch 51/100
+17/17 [==============================] - 89s 5s/step - loss: 0.0977 - accuracy: 0.9649 - val_loss: 0.7818 - val_accuracy: 0.8444
+Epoch 52/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1130 - accuracy: 0.9649 - val_loss: 0.8787 - val_accuracy: 0.8370
+Epoch 53/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0626 - accuracy: 0.9834 - val_loss: 0.5600 - val_accuracy: 0.8593
+Epoch 54/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0352 - accuracy: 0.9871 - val_loss: 0.7066 - val_accuracy: 0.8296
+Epoch 55/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0455 - accuracy: 0.9889 - val_loss: 0.6914 - val_accuracy: 0.8593
+Epoch 56/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0508 - accuracy: 0.9926 - val_loss: 0.8597 - val_accuracy: 0.8296
+Epoch 57/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0232 - accuracy: 0.9963 - val_loss: 0.8207 - val_accuracy: 0.8296
+Epoch 58/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0511 - accuracy: 0.9871 - val_loss: 0.7804 - val_accuracy: 0.8370
+Epoch 59/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0632 - accuracy: 0.9815 - val_loss: 0.7839 - val_accuracy: 0.8222
+Epoch 60/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0671 - accuracy: 0.9760 - val_loss: 0.7349 - val_accuracy: 0.8074
+Epoch 61/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0458 - accuracy: 0.9908 - val_loss: 0.8732 - val_accuracy: 0.8296
+Epoch 62/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0475 - accuracy: 0.9834 - val_loss: 0.9610 - val_accuracy: 0.8444
+Epoch 63/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0697 - accuracy: 0.9760 - val_loss: 0.9557 - val_accuracy: 0.8667
+Epoch 64/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0703 - accuracy: 0.9834 - val_loss: 0.6835 - val_accuracy: 0.8519
+Epoch 65/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0449 - accuracy: 0.9815 - val_loss: 0.9911 - val_accuracy: 0.8444
+Epoch 66/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0412 - accuracy: 0.9871 - val_loss: 1.1733 - val_accuracy: 0.8074
+Epoch 67/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0902 - accuracy: 0.9613 - val_loss: 0.8058 - val_accuracy: 0.8519
+Epoch 68/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1381 - accuracy: 0.9668 - val_loss: 0.8370 - val_accuracy: 0.8519
+Epoch 69/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1087 - accuracy: 0.9613 - val_loss: 0.7868 - val_accuracy: 0.8593
+Epoch 70/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0871 - accuracy: 0.9686 - val_loss: 1.0124 - val_accuracy: 0.8074
+Epoch 71/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1113 - accuracy: 0.9668 - val_loss: 1.0515 - val_accuracy: 0.8074
+Epoch 72/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0934 - accuracy: 0.9742 - val_loss: 0.8729 - val_accuracy: 0.8222
+Epoch 73/100
+17/17 [==============================] - 86s 5s/step - loss: 0.1163 - accuracy: 0.9668 - val_loss: 0.9274 - val_accuracy: 0.8148
+Epoch 74/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0519 - accuracy: 0.9871 - val_loss: 0.9519 - val_accuracy: 0.8370
+Epoch 75/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0819 - accuracy: 0.9779 - val_loss: 1.0309 - val_accuracy: 0.8148
+Epoch 76/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0908 - accuracy: 0.9742 - val_loss: 0.9901 - val_accuracy: 0.8222
+Epoch 77/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0603 - accuracy: 0.9834 - val_loss: 0.9373 - val_accuracy: 0.8667
+Epoch 78/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0252 - accuracy: 0.9926 - val_loss: 0.9819 - val_accuracy: 0.8222
+Epoch 79/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0271 - accuracy: 0.9908 - val_loss: 0.7821 - val_accuracy: 0.8593
+Epoch 80/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0209 - accuracy: 0.9945 - val_loss: 1.1163 - val_accuracy: 0.8519
+Epoch 81/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0159 - accuracy: 0.9945 - val_loss: 0.9917 - val_accuracy: 0.8519
+Epoch 82/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0372 - accuracy: 0.9871 - val_loss: 0.9513 - val_accuracy: 0.8444
+Epoch 83/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0113 - accuracy: 0.9963 - val_loss: 0.8274 - val_accuracy: 0.8815
+Epoch 84/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0151 - accuracy: 0.9982 - val_loss: 0.8992 - val_accuracy: 0.8889
+Epoch 85/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0177 - accuracy: 0.9945 - val_loss: 1.1137 - val_accuracy: 0.8370
+Epoch 86/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0151 - accuracy: 0.9982 - val_loss: 1.0748 - val_accuracy: 0.8222
+Epoch 87/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0137 - accuracy: 0.9945 - val_loss: 0.8409 - val_accuracy: 0.8519
+Epoch 88/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0135 - accuracy: 0.9963 - val_loss: 0.9300 - val_accuracy: 0.8222
+Epoch 89/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0313 - accuracy: 0.9963 - val_loss: 1.1015 - val_accuracy: 0.8444
+Epoch 90/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0072 - accuracy: 0.9982 - val_loss: 1.2417 - val_accuracy: 0.8296
+Epoch 91/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0072 - accuracy: 0.9982 - val_loss: 0.9524 - val_accuracy: 0.8519
+Epoch 92/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0038 - accuracy: 1.0000 - val_loss: 0.9682 - val_accuracy: 0.8444
+Epoch 93/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0142 - accuracy: 0.9926 - val_loss: 1.0509 - val_accuracy: 0.8148
+Epoch 94/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0064 - accuracy: 1.0000 - val_loss: 0.9176 - val_accuracy: 0.8370
+Epoch 95/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0060 - accuracy: 0.9982 - val_loss: 0.9528 - val_accuracy: 0.8593
+Epoch 96/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0196 - accuracy: 0.9963 - val_loss: 0.8777 - val_accuracy: 0.8741
+Epoch 97/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0026 - accuracy: 1.0000 - val_loss: 1.0024 - val_accuracy: 0.8370
+Epoch 98/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0070 - accuracy: 0.9963 - val_loss: 1.0634 - val_accuracy: 0.8074
+Epoch 99/100
+17/17 [==============================] - 87s 5s/step - loss: 0.0025 - accuracy: 1.0000 - val_loss: 1.0717 - val_accuracy: 0.8296
+Epoch 100/100
+17/17 [==============================] - 86s 5s/step - loss: 0.0081 - accuracy: 0.9982 - val_loss: 1.0605 - val_accuracy: 0.8593
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
+
+for image_batch, labels_batch in train_ds:
+  print(image_batch.shape)
+  print(labels_batch.shape)
+  break
+  
+  AUTOTUNE = tf.data.AUTOTUNE
+
+train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+
+normalization_layer = layers.Rescaling(1./255)
+
+normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+image_batch, labels_batch = next(iter(normalized_ds))
+first_image = image_batch[0]
+# Notice the pixel values are now in `[0,1]`.
+print(np.min(first_image), np.max(first_image)) 
+
+num_classes = len(class_names)
+
+model = Sequential([
+  layers.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+  layers.Conv2D(16, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+model.compile(optimizer= 'adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+              
+model.summary()
+
+epochs=10
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
+)
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
+
+data_augmentation = keras.Sequential(
+  [
+    layers.RandomFlip("horizontal",
+                      input_shape=(img_height,
+                                  img_width,
+                                  3)),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.1),
+  ]
+)
+
+plt.figure(figsize=(10, 10))
+for images, _ in train_ds.take(1):
+  for i in range(9):
+    augmented_images = data_augmentation(images)
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(augmented_images[0].numpy().astype("uint8"))
+    plt.axis("off")
+    
+    model = Sequential([
+  data_augmentation,
+  layers.Rescaling(1./255),
+  layers.Conv2D(16, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),    # max pooling layer
+  layers.Conv2D(32, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),   # max pooling layer
+  layers.Conv2D(64, 3, padding='same', activation='relu'), # COVN layer
+  layers.MaxPooling2D(),    # max pooling layer
+  layers.Dropout(0.2),   # you may want to tune on drop out rate
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+              
+epochs = 100
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
+)
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
